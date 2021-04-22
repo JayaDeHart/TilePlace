@@ -1,0 +1,19 @@
+.canvas-main-container {
+  flex-direction: column;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.scroll-handler {
+  overflow: hidden;
+  max-width: 960px;
+  max-height: 540px;
+}
+canvas {
+  width: 960px;
+  height: 540px;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
