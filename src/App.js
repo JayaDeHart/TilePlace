@@ -6,6 +6,7 @@ import ColorContext from "./context/colorContext";
 
 function App() {
   const [activeColor, setActiveColor] = useState();
+
   return (
     <ColorContext.Provider value={{ activeColor, setActiveColor }}>
       <div className="main-container">

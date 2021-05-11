@@ -8,6 +8,7 @@ const socket = io("http://localhost:5000", {
 });
 
 function Canvas() {
+  let [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const { activeColor } = useContext(ColorContext);
   const [scale, setScale] = useState(1);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -31,8 +32,12 @@ function Canvas() {
   }, []);
 
   useEffect(() => {
-    socket.on("update", (data) => {
-      setBoardState(data.updateDescription.updatedFields.state);
+    socket.on("tilePlace", (data) => {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+      let { x, y, color } = data;
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, 1, 1);
     });
   }, []);
 
@@ -54,38 +59,31 @@ function Canvas() {
     }
   }
 
-  function handleMouseMove(e) {
-    let pastLimitLeft = canvasRef.current.getBoundingClientRect().x > 288;
-    let pastLimitTop = canvasRef.current.getBoundingClientRect().y > 145;
-    let pastLimitRight = canvasRef.current.getBoundingClientRect().right < 1248;
-    let pastLimitBottom =
-      canvasRef.current.getBoundingClientRect().bottom < 685;
-    let canMove = true;
+  function clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+  }
 
+  function handleMouseMove(e) {
+    setMousePos({ x: e.pageX - 763, y: e.pageY - 433 });
     if (isPan) {
       let deltaX = e.pageX - dragStart.x;
       let deltaY = e.pageY - dragStart.y;
-      if (pastLimitLeft && deltaX > 0) {
-        canMove = false;
-      }
-      if (pastLimitRight && deltaX < 0) {
-        canMove = false;
-      }
-      if (pastLimitTop && deltaY > 0) {
-        canMove = false;
-      }
-      if (pastLimitBottom && deltaY < 0) {
-        canMove = false;
-      }
-      if (canMove) {
-        setPanState((panState) => {
-          return {
-            x: panState.x + deltaX,
-            y: panState.y + deltaY,
-          };
-        });
-        setDragStart({ x: e.pageX, y: e.pageY });
-      }
+      setPanState((panState) => {
+        let x0 = panState.x + deltaX;
+        let y0 = panState.y + deltaY;
+        let x1 = x0 / (scale - 1);
+        let y1 = y0 / (scale - 1);
+        let initialX = clamp(x1, -480.8, 480.8);
+        let initialY = clamp(y1, -270.4, 270.4);
+        let finalX = initialX * (scale - 1);
+        let finalY = initialY * (scale - 1);
+        return {
+          x: finalX,
+          y: finalY,
+        };
+      });
+
+      setDragStart({ x: e.pageX, y: e.pageY });
     }
   }
 
@@ -117,6 +115,7 @@ function Canvas() {
       let x = Math.floor((e.clientX - rect.left) / 3 / scale);
       let y = Math.floor((e.clientY - rect.top) / 3 / scale);
 
+      //we might need this we might not
       const canvas = canvasRef.current;
       const ctx = canvas.getContext("2d");
       ctx.fillStyle = activeColor;
@@ -134,6 +133,8 @@ function Canvas() {
       } catch (err) {
         console.log(err);
       }
+
+      socket.emit("tilePlace", { x, y, color: activeColor });
     }
   }
 
@@ -144,14 +145,30 @@ function Canvas() {
     drawCanvas(boardState, ctx);
   }, [boardState]);
 
-  let panStyle;
-
-  panStyle = {
+  let panStyle = {
     transform: `translate(${panState.x}px,${panState.y}px)`,
   };
 
+  let nocursor;
+  if (activeColor) {
+    nocursor = { cursor: "none" };
+  }
+
   return (
-    <div className="canvas-main-container" onMouseUp={handleMouseUp}>
+    <div
+      style={nocursor}
+      className="canvas-main-container"
+      onMouseUp={handleMouseUp}
+    >
+      {activeColor && (
+        <div
+          style={{
+            backgroundColor: activeColor,
+            transform: `translate(${mousePos.x}px,${mousePos.y}px)`,
+          }}
+          className="cursor"
+        ></div>
+      )}
       <div className="scroll-handler">
         <div style={panStyle}>
           <canvas
@@ -171,7 +188,10 @@ function Canvas() {
       </div>
       <br></br>
       {/* comment in to see board position data \/ */}
-      <div></div>
+      {/* <div>
+        <span>{JSON.stringify(panState)}</span>
+        <span> {scale}</span>
+      </div> */}
     </div>
   );
 }
