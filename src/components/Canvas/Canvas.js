@@ -149,8 +149,17 @@ function Canvas() {
     transform: `translate(${panState.x}px,${panState.y}px)`,
   };
 
+  // let nocursor;
+  // if (activeColor) {
+  //   nocursor = { cursor: "none" };
+  // }
+
   return (
-    <div className="canvas-main-container" onMouseUp={handleMouseUp}>
+    <div
+      // style={nocursor}
+      className="canvas-main-container"
+      onMouseUp={handleMouseUp}
+    >
       {activeColor && (
         <div
           style={{
