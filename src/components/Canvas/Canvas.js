@@ -3,11 +3,12 @@ import "./Canvas.css";
 import io from "socket.io-client";
 import ColorContext from "../../context/colorContext";
 
-const socket = io("http://localhost:5000", {
+const socket = io(process.env.REACT_APP_CONNECTION_URL, {
   transports: ["websocket", "polling", "flashsocket"],
 });
 
 function Canvas() {
+  const url = process.env.REACT_APP_CONNECTION_URL;
   let [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const { activeColor } = useContext(ColorContext);
   const [scale, setScale] = useState(1);
@@ -19,9 +20,9 @@ function Canvas() {
 
   useEffect(() => {
     async function fetchState() {
-      let url = "http://localhost:5000/boardstate";
+      let fetchUrl = url + "/boardstate";
       try {
-        const response = await fetch(url);
+        const response = await fetch(fetchUrl);
         const responseData = await response.json();
         setBoardState(responseData.state.state);
       } catch (err) {
@@ -108,8 +109,7 @@ function Canvas() {
   }
 
   async function handleClick(e) {
-    // let url = process.env.REACT_APP_CONNECTION_URL;
-    let url = "http://localhost:5000/boardstate";
+    let postUrl = url + "/boardstate";
     if (activeColor) {
       let rect = e.target.getBoundingClientRect();
       let x = Math.floor((e.clientX - rect.left) / 3 / scale);
@@ -122,7 +122,7 @@ function Canvas() {
       ctx.fillRect(x, y, 1, 1);
 
       try {
-        const response = await fetch(url, {
+        const response = await fetch(postUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ x, y, color: activeColor }),
@@ -149,17 +149,8 @@ function Canvas() {
     transform: `translate(${panState.x}px,${panState.y}px)`,
   };
 
-  let nocursor;
-  if (activeColor) {
-    nocursor = { cursor: "none" };
-  }
-
   return (
-    <div
-      style={nocursor}
-      className="canvas-main-container"
-      onMouseUp={handleMouseUp}
-    >
+    <div className="canvas-main-container" onMouseUp={handleMouseUp}>
       {activeColor && (
         <div
           style={{
