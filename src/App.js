@@ -3,6 +3,7 @@ import "./App.css";
 import Header from "./components/Header/Header";
 import Canvas from "./components/Canvas/Canvas";
 import ColorContext from "./context/colorContext";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 function App() {
   const [activeColor, setActiveColor] = useState();

@@ -149,17 +149,8 @@ function Canvas() {
     transform: `translate(${panState.x}px,${panState.y}px)`,
   };
 
-  // let nocursor;
-  // if (activeColor) {
-  //   nocursor = { cursor: "none" };
-  // }
-
   return (
-    <div
-      // style={nocursor}
-      className="canvas-main-container"
-      onMouseUp={handleMouseUp}
-    >
+    <div className="canvas-main-container" onMouseUp={handleMouseUp}>
       {activeColor && (
         <div
           style={{
@@ -187,11 +178,6 @@ function Canvas() {
         </div>
       </div>
       <br></br>
-      {/* comment in to see board position data \/ */}
-      {/* <div>
-        <span>{JSON.stringify(panState)}</span>
-        <span> {scale}</span>
-      </div> */}
     </div>
   );
 }
