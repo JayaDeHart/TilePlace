@@ -18,8 +18,8 @@ On the backend, set create an .env file with a value for DB_URL to connect a loc
 <h2>Testing</h2>
 The route GET "/boardstate" will return you a 180x320 2 dimensional array with color hex codes as values. This represents the drawable canvas on a pixel-pixel level
 
-The route POST "/boardstate" expects data in a {x,y,color} format, representing the position and color of a single pixel to be updated. The api will respond with "succes" or 
-"failure".
+The route POST "/boardstate" expects data in a {x,y,color} format, representing the position and color of a single pixel to be updated. The api will respond with "success" or 
+"failure"
 
 On the frontend, creating a new pixel will simultaneously post to this route and emit a socket.io event with the same information. This causes all instances of the frontend to update with the new pixel without creating a new request to the database
 
